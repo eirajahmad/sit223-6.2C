@@ -51,7 +51,12 @@ pipeline {
             }
         }
     }
-
+post {
+        success {
+            // Send email on success
+            mail to: 'ahmadeiraj@gmail.com', subject: 'Build success', body: 'Logs attached.', attachLog: true
+        }
+    }
     post {
         failure {
             // Send email on failure
