@@ -55,7 +55,7 @@ pipeline {
         emailext (
             subject: "Jenkins Pipeline Success: ${currentBuild.fullDisplayName}",
             body: "The pipeline has completed successfully. See details: ${env.BUILD_URL}",
-            to: 'ahmadeiraj@gmail.com@gmail.com'
+            to: 'ahmadeiraj@gmail.com'
         )
     }
     }
