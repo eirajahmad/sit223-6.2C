@@ -2,65 +2,61 @@ pipeline {
     agent any 
 
     stages {
-        stage('Build') {
+        stage('Stage 1 - Build') {
             steps {
-                // Use Maven to build the project
-                sh 'mvn clean install'
+                echo 'Building the project...'
+                // Add your build steps here
             }
         }
-        
-        stage('Unit & Integration Tests') {
+        stage('Stage 2 - Unit and Integration Tests') {
             steps {
-                // Run tests with Maven
-                sh 'mvn test'
+                echo 'Running tests...'
+                // Add your test steps here
             }
         }
-
-        stage('Code Analysis') {
+        stage('Stage 3 - Code Analysis') {
             steps {
-                // Integrate with SonarQube (assuming you've set it up)
-                sh 'mvn sonar:sonar'
+                echo 'Analyzing code...'
+                // Add your code analysis steps here
             }
         }
-
-        stage('Security Scan') {
+        stage('Stage 4 - Security Scan') {
             steps {
-                // Use OWASP Dependency-Check (you'll need to set this up)
-                sh 'dependency-check.sh --project MyProject --scan ./path'
+                echo 'Scanning for security vulnerabilities...'
+                // Add your security scan steps here
             }
         }
-
-        stage('Deploy to Staging') {
+        stage('Stage 5 - Deploy to Staging') {
             steps {
-                // Deploy to AWS EC2 (this will vary based on your setup)
-                sh './deploy-to-staging.sh'
+                echo 'Deploying to staging...'
+                // Add your deployment to staging steps here
             }
         }
-
-        stage('Integration Tests on Staging') {
+        stage('Stage 6 - Integration Tests on Staging') {
             steps {
-                // Run tests on staging
-                sh './run-integration-tests.sh'
+                echo 'Running integration tests on staging...'
+                // Add your integration tests on staging steps here
             }
         }
-
-        stage('Deploy to Production') {
+        stage('Stage 7 - Deploy to Production') {
             steps {
-                // Deploy to AWS EC2
-                sh './deploy-to-production.sh'
+                echo 'Deploying to production...'
+                // Add your deployment to production steps here
             }
         }
     }
-post {
-        success {
-            // Send email on success
-            mail to: 'ahmadeiraj@gmail.com', subject: 'Build success', body: 'Logs attached.', attachLog: true
-        }
-    }
+    
     post {
-        failure {
-            // Send email on failure
-            mail to: 'ahmadeiraj@gmail.com', subject: 'Pipeline Failed', body: 'Logs attached.', attachLog: true
+        always {
+            echo 'Sending notification email...'
+            // Configure and send your notification email here
         }
+        success {
+        emailext (
+            subject: "Jenkins Pipeline Success: ${currentBuild.fullDisplayName}",
+            body: "The pipeline has completed successfully. See details: ${env.BUILD_URL}",
+            to: 'ahmadeiraj@gmail.com@gmail.com'
+        )
+    }
     }
 }
