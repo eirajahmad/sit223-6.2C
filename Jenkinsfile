@@ -1,62 +1,63 @@
 pipeline {
-    agent any 
+    agent any
 
     stages {
-        stage('Stage 1 - Build') {
+        stage('Build') {
             steps {
-                echo 'Building the project...'
-                // Add your build steps here
+                sh 'mvn clean install > build-log.txt 2>&1'
             }
         }
-        stage('Stage 2 - Unit and Integration Tests') {
+        
+        stage('Unit and Integration Tests') {
             steps {
-                echo 'Running tests...'
-                // Add your test steps here
+                sh 'mvn test > test-log.txt 2>&1'
             }
         }
-        stage('Stage 3 - Code Analysis') {
+        
+        stage('Code Analysis') {
             steps {
-                echo 'Analyzing code...'
-                // Add your code analysis steps here
+                sh 'mvn sonar:sonar > code-analysis-log.txt 2>&1'
             }
         }
-        stage('Stage 4 - Security Scan') {
+        
+        stage('Security Scan') {
             steps {
-                echo 'Scanning for security vulnerabilities...'
-                // Add your security scan steps here
+                sh 'dependency-check.sh --project "My Project" --scan . > security-scan-log.txt 2>&1'
             }
         }
-        stage('Stage 5 - Deploy to Staging') {
+        
+        stage('Deploy to Staging') {
             steps {
-                echo 'Deploying to staging...'
-                // Add your deployment to staging steps here
+                sh './deploy-staging.sh > deploy-staging-log.txt 2>&1'
             }
         }
-        stage('Stage 6 - Integration Tests on Staging') {
+        
+        stage('Integration Tests on Staging') {
             steps {
-                echo 'Running integration tests on staging...'
-                // Add your integration tests on staging steps here
+                sh './run-integration-tests.sh > integration-tests-staging-log.txt 2>&1'
             }
         }
-        stage('Stage 7 - Deploy to Production') {
+        
+        stage('Deploy to Production') {
             steps {
-                echo 'Deploying to production...'
-                // Add your deployment to production steps here
+                sh './deploy-production.sh > deploy-production-log.txt 2>&1'
             }
         }
     }
-    
+
     post {
         always {
-            echo 'Sending notification email...'
-            // Configure and send your notification email here
+            script {
+                // Concatenate all log files into one
+                sh 'cat build-log.txt test-log.txt code-analysis-log.txt security-scan-log.txt deploy-staging-log.txt integration-tests-staging-log.txt deploy-production-log.txt > all-logs.txt'
+                // Get the content of all-logs.txt
+                def logContent = readFile 'all-logs.txt'
+                mail (
+                    subject: "Pipeline Completion: ${currentBuild.fullDisplayName}",
+                    body: "The pipeline has completed. See details: ${env.BUILD_URL}\n\nLogs:\n${logContent}",
+                    to: 'ahmadeiraj@gmail.com'
+                )
+            }
         }
-        success {
-        emailext (
-            subject: "Jenkins Pipeline Success: ${currentBuild.fullDisplayName}",
-            body: "The pipeline has completed successfully. See details: ${env.BUILD_URL}",
-            to: 'ahmadeiraj@gmail.com'
-        )
-    }
     }
 }
